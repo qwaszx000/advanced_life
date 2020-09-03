@@ -11,27 +11,34 @@ class GameField : public Gtk::DrawingArea{
     public:
         GameField(){
             set_size_request(400, 400);
+            this->game = new Game(20, 20);
         }
+
+        ~GameField(){
+            delete this->game;
+        }
+
+        bool getPauseState(){
+            return this->game->paused;
+        }
+
+        void togglePauseState(){
+            this->game->paused = !this->game->paused;
+        }
+  
         /*GameField(int count_width = 20, int count_height = 20, int cell_size = 20){
             set_size_request( (cell_size+1)*count_width + 1, (cell_size+1)*count_height + 1);
         }*/
-
-        void setGame(Game *game){
-            this->game = game;
-        }
     
     protected:
         bool on_draw(const Cairo::RefPtr<Cairo::Context> &context) override{
             drawGrid(context);
-
-            context->set_source_rgb(1.0, 0.0, 0.0);
-            context->rectangle(1, 1, 19, 19);
-            context->fill();
-            context->stroke();
+            drawCells(context);
 
             return true;
         }
 
+    private:
         void drawGrid(const Cairo::RefPtr<Cairo::Context> &context){
             //black line
             context->set_line_width(1.0);
@@ -48,4 +55,15 @@ class GameField : public Gtk::DrawingArea{
             }
             context->stroke();
         }
+
+        void drawCells(const Cairo::RefPtr<Cairo::Context> &context){
+            for(Alive *a : this->game->alives){
+                context->set_source_rgb(1.0, 0.0, 0.0);
+                context->rectangle(a->x*20+1, a->y*20+1, 18, 18);
+                context->fill();
+                context->stroke();
+            }
+        }
+
+
 };

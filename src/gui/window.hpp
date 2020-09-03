@@ -12,7 +12,6 @@
 #include <gtkmm/drawingarea.h>
 
 class GameWindow : public Gtk::Window{
-    Game *game;
     GameField field;
     //Gtk::DrawingArea field;
 
@@ -25,8 +24,6 @@ class GameWindow : public Gtk::Window{
 
     public:
         GameWindow(){
-            game = new Game();
-
             //prepare window
             set_border_width(10);
             set_title("Life simulation");
@@ -66,7 +63,6 @@ class GameWindow : public Gtk::Window{
             //selected_cell_genes_buffer->set_text("Test");
 
             //create main field
-            field.setGame(game);
             fixed_layout.put(field, 10, 10);
 
             show_all();
@@ -75,11 +71,7 @@ class GameWindow : public Gtk::Window{
     private:
         //pause_btn click handler
         void pause_toggle(){
-            this->game->paused = !this->game->paused;
-            if(this->game->paused){
-                this->pause_btn.set_label("Run");
-            } else {
-                this->pause_btn.set_label("Pause");
-            }
+            field.togglePauseState();
+            this->pause_btn.set_label(field.getPauseState() ? "Run" : "Pause");
         }
 };
