@@ -41,16 +41,22 @@ class GameWindow : public Gtk::Window{
             delay_option_label.set_text("Delay(ms):");
             fixed_layout.put(delay_option_label, 420, 125);
             delay_entry.set_max_length(5);
+            delay_entry.set_text("1000");
+            delay_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::delay_change));
             fixed_layout.put(delay_entry, 570, 120);
 
             mutation_option_label.set_text("Mutation chanse(%):");
             fixed_layout.put(mutation_option_label, 420, 155);
             mutation_entry.set_max_length(3);
+            mutation_entry.set_text("10");
+            mutation_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::mutation_chance_change));
             fixed_layout.put(mutation_entry, 570, 150);
 
             split_energy_option_label.set_text("Energy to split:");
             fixed_layout.put(split_energy_option_label, 420, 185);
             split_energy_entry.set_max_length(5);
+            split_energy_entry.set_text("50");
+            split_energy_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::split_cost_change));
             fixed_layout.put(split_energy_entry, 570, 180);
 
             //create selected cell genes textbox
@@ -60,7 +66,6 @@ class GameWindow : public Gtk::Window{
             selected_cell_genes_view.set_buffer(selected_cell_genes_buffer);
 
             fixed_layout.put(selected_cell_genes_view, 420, 10);
-            //selected_cell_genes_buffer->set_text("Test");
 
             //create main field
             fixed_layout.put(field, 10, 10);
@@ -73,5 +78,17 @@ class GameWindow : public Gtk::Window{
         void pause_toggle(){
             field.togglePauseState();
             this->pause_btn.set_label(field.getPauseState() ? "Run" : "Pause");
+        }
+        //per step delay change handler
+        void delay_change(){
+            field.delay_ms = atoi(delay_entry.get_text().c_str());
+        }
+        //mutation chance change handler
+        void mutation_chance_change(){
+            field.mutation_chance = atoi(mutation_entry.get_text().c_str());
+        }
+        //split energy cost change handler
+        void split_cost_change(){
+            field.split_cost = atoi(split_energy_entry.get_text().c_str());
         }
 };

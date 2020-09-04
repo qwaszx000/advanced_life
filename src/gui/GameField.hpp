@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gtkmm/drawingarea.h>
+#include <glibmm.h>
 #include <cairomm/context.h>
 
 #include "../game/Game.hpp"
@@ -9,9 +10,19 @@ class GameField : public Gtk::DrawingArea{
     Game *game;
 
     public:
+        uint8 split_cost = 50;
+        uint8 mutation_chance = 10;
+        //timer
+        int delay_ms = 1000;
+        sigc::slot<bool> timer_slot;
+        sigc::connection timer_conn;
+
         GameField(){
             set_size_request(400, 400);
             this->game = new Game(20, 20);
+            //timer
+            timer_slot = sigc::mem_fun(*this, &GameField::redraw);
+            timer_conn = Glib::signal_timeout().connect(timer_slot, delay_ms);
         }
 
         ~GameField(){
@@ -34,7 +45,11 @@ class GameField : public Gtk::DrawingArea{
         bool on_draw(const Cairo::RefPtr<Cairo::Context> &context) override{
             drawGrid(context);
             drawCells(context);
+            return true;
+        }
 
+        bool redraw(){
+            this->queue_draw();
             return true;
         }
 
