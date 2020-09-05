@@ -5,7 +5,6 @@
 #include <gtkmm/textview.h>
 #include <gtkmm/label.h>
 #include <gtkmm/entry.h>
-#include <iostream>
 
 #include "GameField.hpp"
 #include "../game/Game.hpp"
@@ -13,14 +12,13 @@
 
 class GameWindow : public Gtk::Window{
     GameField field;
-    //Gtk::DrawingArea field;
 
     Gtk::Fixed fixed_layout;
-    Gtk::Button pause_btn;
+    Gtk::Button pause_btn, one_step_btn;
     Gtk::TextView selected_cell_genes_view;
 
-    Gtk::Label delay_option_label, mutation_option_label, split_energy_option_label;
-    Gtk::Entry delay_entry, mutation_entry, split_energy_entry;
+    Gtk::Label delay_option_label, mutation_option_label, split_energy_option_label, round_energy_option_label, energy_consumption_option_label;
+    Gtk::Entry delay_entry, mutation_entry, split_energy_entry, round_energy_entry, energy_consumption_entry;
 
     public:
         GameWindow(){
@@ -35,7 +33,11 @@ class GameWindow : public Gtk::Window{
             //create pause btn
             pause_btn.set_label("Run");
             pause_btn.signal_clicked().connect(sigc::mem_fun(*this, &GameWindow::pause_toggle));
-            fixed_layout.put(pause_btn, 205, 450);
+            fixed_layout.put(pause_btn, 200, 450);
+            //one step btn
+            one_step_btn.set_label("One step");
+            one_step_btn.signal_clicked().connect(sigc::mem_fun(*this, &GameWindow::one_step));
+            fixed_layout.put(one_step_btn, 250, 450);
 
             //create options
             delay_option_label.set_text("Delay(ms):");
@@ -59,6 +61,20 @@ class GameWindow : public Gtk::Window{
             split_energy_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::split_cost_change));
             fixed_layout.put(split_energy_entry, 570, 180);
 
+            round_energy_option_label.set_text("Energy per round:");
+            fixed_layout.put(round_energy_option_label, 420, 215);
+            round_energy_entry.set_max_length(5);
+            round_energy_entry.set_text("200");
+            round_energy_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::round_energy_change));
+            fixed_layout.put(round_energy_entry, 570, 210);
+
+            energy_consumption_option_label.set_text("Energy consumption:");
+            fixed_layout.put(energy_consumption_option_label, 420, 245);
+            energy_consumption_entry.set_max_length(5);
+            energy_consumption_entry.set_text("10");
+            energy_consumption_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::energy_consumption_change));
+            fixed_layout.put(energy_consumption_entry, 570, 240);
+
             //create selected cell genes textbox
             auto selected_cell_genes_buffer = Gtk::TextBuffer::create();
             selected_cell_genes_view.set_border_width(5);
@@ -79,16 +95,28 @@ class GameWindow : public Gtk::Window{
             field.togglePauseState();
             this->pause_btn.set_label(field.getPauseState() ? "Run" : "Pause");
         }
+        //one_step_btn click handler
+        void one_step(){
+            field.one_step();
+        }
         //per step delay change handler
         void delay_change(){
             field.delay_ms = atoi(delay_entry.get_text().c_str());
         }
         //mutation chance change handler
         void mutation_chance_change(){
-            field.mutation_chance = atoi(mutation_entry.get_text().c_str());
+            field.game->mutation_chance = atoi(mutation_entry.get_text().c_str());
         }
         //split energy cost change handler
         void split_cost_change(){
-            field.split_cost = atoi(split_energy_entry.get_text().c_str());
+            field.game->split_cost = atoi(split_energy_entry.get_text().c_str());
+        }
+        //split energy cost change handler
+        void round_energy_change(){
+            field.game->energy_per_round = atoi(round_energy_entry.get_text().c_str());
+        }
+        //split energy cost change handler
+        void energy_consumption_change(){
+            field.game->energy_consumption = atoi(energy_consumption_entry.get_text().c_str());
         }
 };

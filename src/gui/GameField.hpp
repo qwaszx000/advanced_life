@@ -7,11 +7,8 @@
 #include "../game/Game.hpp"
 
 class GameField : public Gtk::DrawingArea{
-    Game *game;
-
     public:
-        uint8 split_cost = 50;
-        uint8 mutation_chance = 10;
+        Game *game;
         //timer
         int delay_ms = 1000;
         sigc::slot<bool> timer_slot;
@@ -37,6 +34,11 @@ class GameField : public Gtk::DrawingArea{
             this->game->paused = !this->game->paused;
         }
   
+        void one_step(){
+            this->game->step();
+            this->queue_draw();
+        }
+
         /*GameField(int count_width = 20, int count_height = 20, int cell_size = 20){
             set_size_request( (cell_size+1)*count_width + 1, (cell_size+1)*count_height + 1);
         }*/
@@ -44,12 +46,16 @@ class GameField : public Gtk::DrawingArea{
     protected:
         bool on_draw(const Cairo::RefPtr<Cairo::Context> &context) override{
             drawGrid(context);
+            drawCorps(context);
             drawCells(context);
             return true;
         }
 
         bool redraw(){
-            this->queue_draw();
+            if(!getPauseState()){
+                this->game->step();
+                this->queue_draw();
+            }
             return true;
         }
 
@@ -75,6 +81,15 @@ class GameField : public Gtk::DrawingArea{
             for(Alive *a : this->game->alives){
                 context->set_source_rgb(1.0, 0.0, 0.0);
                 context->rectangle(a->x*20+1, a->y*20+1, 18, 18);
+                context->fill();
+                context->stroke();
+            }
+        }
+
+        void drawCorps(const Cairo::RefPtr<Cairo::Context> &context){
+            for(Corps *c : this->game->corps){
+                context->set_source_rgb(0.5, 0.5, 0.5);
+                context->rectangle(c->x*20+1, c->y*20+1, 18, 18);
                 context->fill();
                 context->stroke();
             }

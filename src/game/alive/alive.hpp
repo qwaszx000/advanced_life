@@ -13,7 +13,12 @@ class Alive{
             this->x = x;
             this->y = y;
             this->id = Alive::id_counter;
-            Alive::id_counter++;
+            
+            if(Alive::id_counter == 255){
+                Alive::id_counter = 0;
+            } else {
+                Alive::id_counter++;
+            }
         }
 };
 
