@@ -38,15 +38,11 @@ class GameField : public Gtk::DrawingArea{
             this->game->step();
             this->queue_draw();
         }
-
-        /*GameField(int count_width = 20, int count_height = 20, int cell_size = 20){
-            set_size_request( (cell_size+1)*count_width + 1, (cell_size+1)*count_height + 1);
-        }*/
     
     protected:
         bool on_draw(const Cairo::RefPtr<Cairo::Context> &context) override{
             drawGrid(context);
-            drawCorps(context);
+            drawFood(context);
             drawCells(context);
             return true;
         }
@@ -86,10 +82,10 @@ class GameField : public Gtk::DrawingArea{
             }
         }
 
-        void drawCorps(const Cairo::RefPtr<Cairo::Context> &context){
-            for(Corps *c : this->game->corps){
+        void drawFood(const Cairo::RefPtr<Cairo::Context> &context){
+            for(Food *f : this->game->food){
                 context->set_source_rgb(0.5, 0.5, 0.5);
-                context->rectangle(c->x*20+1, c->y*20+1, 18, 18);
+                context->rectangle(f->x*20+1, f->y*20+1, 18, 18);
                 context->fill();
                 context->stroke();
             }
