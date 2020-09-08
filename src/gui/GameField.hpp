@@ -75,7 +75,8 @@ class GameField : public Gtk::DrawingArea{
 
         void drawCells(const Cairo::RefPtr<Cairo::Context> &context){
             for(Alive *a : this->game->alives){
-                context->set_source_rgb(1.0, 0.0, 0.0);
+                //context->set_source_rgb(1.0, 0.0, 0.0);
+                context->set_source_rgb(a->color_red, a->color_green, a->color_blue);
                 context->rectangle(a->x*20+1, a->y*20+1, 18, 18);
                 context->fill();
                 context->stroke();

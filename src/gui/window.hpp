@@ -106,6 +106,12 @@ class GameWindow : public Gtk::Window{
         //mutation chance change handler
         void mutation_chance_change(){
             field.game->mutation_chance = atoi(mutation_entry.get_text().c_str());
+            if(field.game->mutation_chance == 0){
+                field.game->mutation_chance = 1;
+            } else if (field.game->mutation_chance > 100){
+                field.game->mutation_chance = 100;
+            }
+            
         }
         //split energy cost change handler
         void split_cost_change(){

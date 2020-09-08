@@ -3,6 +3,7 @@
 #include <vector>
 #include "alive/alive.hpp"
 #include "food/food.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 
@@ -63,8 +64,6 @@ class Game{
             for(std::vector<Alive*>::size_type i = 0; i < size; ++i){
                 Alive *a = this->alives[i];
 
-                std::cout<<(int)a->energy<<std::endl<<(int)a->hp<<std::endl;
-
                 //consumpt energy or hp
                 if(a->energy <= 0){
                     a->hp -= energy_consumption;
@@ -77,7 +76,7 @@ class Game{
                     this->alives.erase(this->alives.begin() + i);
                     --size;
                     this->food.push_back( new Food(a->x, a->y) );
-                    --i; //to compensate it++
+                    --i; //to compensate ++i
                     delete a;
                     continue;
                 }
@@ -117,6 +116,17 @@ class Game{
             return EMPTY;
         }
 
+        std::vector<uint8>* checkFreeCoords(std::vector<uint8>* coords){
+            std::vector<uint8>* free_coords = new std::vector<uint8>();
+            for(uint8 i = 0; i < coords->size(); i+=2){
+                if(lookAtCoords(coords->at(i), coords->at(i+1)) == GameObjects::EMPTY){
+                    free_coords->push_back(coords->at(i));
+                    free_coords->push_back(coords->at(i+1));
+                }
+            }
+            delete coords;
+            return free_coords;
+        }
 
         void process_turn(Alive *a){
             uint8 loop_limit = 70;
@@ -165,9 +175,11 @@ class Game{
                     }
 
                     case Commands::get_sun_energy:{
-                        this->current_available_energy -= 20;
-                        a->energy += 20;
-                        loop_limit = 0;
+                        if(this->current_available_energy >= 20){
+                            this->current_available_energy -= 20;
+                            a->energy += 20;
+                            loop_limit = 0;
+                        }
                         break;
                     }
 
@@ -196,9 +208,15 @@ class Game{
                             a->energy -= split_cost;
                             loop_limit = 0;
                         }
-                        Alive *child = new Alive(0, 0);
-                        child->setDna(a->dna_code);
-                        this->alives.push_back( child );
+
+                        std::vector<uint8> *free_coords = checkFreeCoords(getCoordinatesAround(a));
+                        if(free_coords->size() >= 2){
+                            Alive *child = new Alive(free_coords->at(0), free_coords->at(1));
+                            delete free_coords;
+                            child->setDna(a->dna_code);
+                            mutate(child);
+                            this->alives.push_back( child );
+                        }
                         break;
                     }
 
@@ -211,44 +229,88 @@ class Game{
             }
         }
 
-
         void move_alive(Alive *a, uint8 dir){
+            uint8 *move = new uint8[2];
+            if(dir == 255){
+                move = getCoordsByDirection(a, a->memory[a->selected_memory]);
+            } else {
+                move = getCoordsByDirection(a, dir);
+            }
+            a->x += move[0];
+            a->y += move[1];
+        }
+
+        void mutate(Alive *a){
+            //percent to chance
+            uint8 tmp = 100 / mutation_chance;
+            if(rand() % tmp == 0){
+                //choise random gene | sizeof returns size in bytes, translate it to count of elements by / on 1 element
+                //tmp = rand() % sizeof(a->dna_code) / sizeof(a->dna_code[0]);
+                tmp = rand() % ARRAY_LEN(a->dna_code);
+                a->dna_code[tmp] = rand() % 256; //0-255
+
+                //mutate color
+                a->color_red = randDouble();
+                a->color_green = randDouble();
+                a->color_blue = randDouble();
+            }
+        }
+
+        std::vector<uint8>* getCoordinatesAround(Alive *a){
+            std::vector<uint8> *around = new std::vector<uint8>();
+            uint8 *coord;
+            
+            for(uint8 i = 0; i<8; ++i){
+                coord = getCoordsByDirection(a, i);
+                around->push_back(coord[0]);
+                around->push_back(coord[1]);
+            }
+
+            return around;
+        }
+
+        uint8* getCoordsByDirection(Alive *a, uint8 dir){
+            uint8 *coords = new uint8[2];
             switch(dir)
             {
                 case 0:
-                    a->x -= 1;
-                    a->y -= 1;
+                    coords[0] = a->x - 1;
+                    coords[1] = a->y - 1;
                     break;
                 case 1:
-                    a->y -= 1;
+                    coords[0] = a->x;
+                    coords[1] = a->y - 1;
                     break;
                 case 2:
-                    a->x += 1;
-                    a->y -= 1;
+                    coords[0] = a->x + 1;
+                    coords[1] = a->y - 1;
                     break;
                 case 3:
-                    a->x += 1;
+                    coords[0] = a->x + 1;
+                    coords[1] = a->y;
                     break;
                 case 4:
-                    a->x += 1;
-                    a->y += 1;
+                    coords[0] = a->x + 1;
+                    coords[1] = a->y + 1;
                     break;
                 case 5:
-                    a->y += 1;
+                    coords[0] = a->x;
+                    coords[1] = a->y + 1;
                     break;
                 case 6:
-                    a->x -= 1;
-                    a->y += 1;
+                    coords[0] = a->x - 1;
+                    coords[1] = a->y + 1;
                     break;
                 case 7:
-                    a->x -= 1;
-                    break;
-                case 255:
-                    move_alive(a, a->memory[a->selected_memory]);
+                    coords[0] = a->x - 1;
+                    coords[1] = a->y;
                     break;
                 default:
+                    coords[0] = a->x;
+                    coords[1] = a->y;
                     break;
             }
+            return coords;
         }
 
 

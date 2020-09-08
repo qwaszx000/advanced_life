@@ -1,6 +1,6 @@
 #pragma once
 
-typedef unsigned char uint8;
+#include "../utils.hpp"
 
 class Food{
     public:
