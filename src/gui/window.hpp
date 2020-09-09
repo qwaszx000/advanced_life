@@ -41,39 +41,39 @@ class GameWindow : public Gtk::Window{
 
             //create options
             delay_option_label.set_text("Delay(ms):");
-            fixed_layout.put(delay_option_label, 420, 125);
+            fixed_layout.put(delay_option_label, 420, 185);
             delay_entry.set_max_length(5);
             delay_entry.set_text("1000");
             delay_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::delay_change));
-            fixed_layout.put(delay_entry, 570, 120);
+            fixed_layout.put(delay_entry, 570, 180);
 
             mutation_option_label.set_text("Mutation chanse(%):");
-            fixed_layout.put(mutation_option_label, 420, 155);
+            fixed_layout.put(mutation_option_label, 420, 215);
             mutation_entry.set_max_length(3);
             mutation_entry.set_text("10");
             mutation_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::mutation_chance_change));
-            fixed_layout.put(mutation_entry, 570, 150);
+            fixed_layout.put(mutation_entry, 570, 210);
 
             split_energy_option_label.set_text("Energy to split:");
-            fixed_layout.put(split_energy_option_label, 420, 185);
+            fixed_layout.put(split_energy_option_label, 420, 245);
             split_energy_entry.set_max_length(5);
             split_energy_entry.set_text("50");
             split_energy_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::split_cost_change));
-            fixed_layout.put(split_energy_entry, 570, 180);
+            fixed_layout.put(split_energy_entry, 570, 240);
 
             round_energy_option_label.set_text("Energy per round:");
-            fixed_layout.put(round_energy_option_label, 420, 215);
+            fixed_layout.put(round_energy_option_label, 420, 275);
             round_energy_entry.set_max_length(5);
             round_energy_entry.set_text("200");
             round_energy_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::round_energy_change));
-            fixed_layout.put(round_energy_entry, 570, 210);
+            fixed_layout.put(round_energy_entry, 570, 270);
 
             energy_consumption_option_label.set_text("Energy consumption:");
-            fixed_layout.put(energy_consumption_option_label, 420, 245);
+            fixed_layout.put(energy_consumption_option_label, 420, 305);
             energy_consumption_entry.set_max_length(5);
             energy_consumption_entry.set_text("10");
             energy_consumption_entry.signal_changed().connect(sigc::mem_fun(*this, &GameWindow::energy_consumption_change));
-            fixed_layout.put(energy_consumption_entry, 570, 240);
+            fixed_layout.put(energy_consumption_entry, 570, 300);
 
             //create selected cell genes textbox
             auto selected_cell_genes_buffer = Gtk::TextBuffer::create();
@@ -84,6 +84,7 @@ class GameWindow : public Gtk::Window{
             fixed_layout.put(selected_cell_genes_view, 420, 10);
 
             //create main field
+            field.set_info_buffer(selected_cell_genes_buffer);
             fixed_layout.put(field, 10, 10);
 
             show_all();
@@ -102,6 +103,7 @@ class GameWindow : public Gtk::Window{
         //per step delay change handler
         void delay_change(){
             field.delay_ms = atoi(delay_entry.get_text().c_str());
+            field.on_delay_change();
         }
         //mutation chance change handler
         void mutation_chance_change(){

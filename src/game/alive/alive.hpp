@@ -31,6 +31,22 @@ class Alive{
             }
         }
 
+        void starve(uint8 energy_consumption){
+            if(this->energy <= 0){
+                if(this->hp < energy_consumption){
+                    this->hp = 0;
+                } else {
+                    this->hp -= energy_consumption;
+                }
+            } else {
+                if(this->energy < energy_consumption){
+                    this->energy = 0;
+                } else {
+                    this->energy -= energy_consumption;
+                }
+            }
+        }
+
 
 };
 
